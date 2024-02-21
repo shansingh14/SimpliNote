@@ -6,98 +6,62 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@a
 
 
 
-type EagerBlog = {
+type EagerUser = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Blog, 'id'>;
+    identifier: ManagedIdentifier<User, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly posts?: (Post | null)[] | null;
+  readonly username: string;
+  readonly notes?: (Note | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
 
-type LazyBlog = {
+type LazyUser = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Blog, 'id'>;
+    identifier: ManagedIdentifier<User, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
-  readonly name: string;
-  readonly posts: AsyncCollection<Post>;
+  readonly username: string;
+  readonly notes: AsyncCollection<Note>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
 
-export declare type Blog = LazyLoading extends LazyLoadingDisabled ? EagerBlog : LazyBlog
+export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser
 
-export declare const Blog: (new (init: ModelInit<Blog>) => Blog) & {
-  copyOf(source: Blog, mutator: (draft: MutableModel<Blog>) => MutableModel<Blog> | void): Blog;
+export declare const User: (new (init: ModelInit<User>) => User) & {
+  copyOf(source: User, mutator: (draft: MutableModel<User>) => MutableModel<User> | void): User;
 }
 
-type EagerPost = {
+type EagerNote = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Post, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
+    identifier: ManagedIdentifier<Note, 'id'>;
   };
   readonly id: string;
-  readonly title: string;
-  readonly blog?: Blog | null;
-  readonly comments?: (Comment | null)[] | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly blogPostsId?: string | null;
-}
-
-type LazyPost = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Post, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly title: string;
-  readonly blog: AsyncItem<Blog | undefined>;
-  readonly comments: AsyncCollection<Comment>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly blogPostsId?: string | null;
-}
-
-export declare type Post = LazyLoading extends LazyLoadingDisabled ? EagerPost : LazyPost
-
-export declare const Post: (new (init: ModelInit<Post>) => Post) & {
-  copyOf(source: Post, mutator: (draft: MutableModel<Post>) => MutableModel<Post> | void): Post;
-}
-
-type EagerComment = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Comment, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly post?: Post | null;
   readonly content: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly postCommentsId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly ownerId: string;
+  readonly user?: User | null;
 }
 
-type LazyComment = {
+type LazyNote = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Comment, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
+    identifier: ManagedIdentifier<Note, 'id'>;
   };
   readonly id: string;
-  readonly post: AsyncItem<Post | undefined>;
   readonly content: string;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-  readonly postCommentsId?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly ownerId: string;
+  readonly user: AsyncItem<User | undefined>;
 }
 
-export declare type Comment = LazyLoading extends LazyLoadingDisabled ? EagerComment : LazyComment
+export declare type Note = LazyLoading extends LazyLoadingDisabled ? EagerNote : LazyNote
 
-export declare const Comment: (new (init: ModelInit<Comment>) => Comment) & {
-  copyOf(source: Comment, mutator: (draft: MutableModel<Comment>) => MutableModel<Comment> | void): Comment;
+export declare const Note: (new (init: ModelInit<Note>) => Note) & {
+  copyOf(source: Note, mutator: (draft: MutableModel<Note>) => MutableModel<Note> | void): Note;
 }

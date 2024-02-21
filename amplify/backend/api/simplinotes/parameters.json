@@ -1,5 +1,11 @@
 {
   "AppSyncApiName": "simplinotes",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
-  "DynamoDBEnableServerSideEncryption": false
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authsimplinotes12a3d390",
+      "Outputs.UserPoolId"
+    ]
+  }
 }

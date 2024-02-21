@@ -8,11 +8,11 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
-export const getBlog = /* GraphQL */ `query GetBlog($id: ID!) {
-  getBlog(id: $id) {
+export const getUser = /* GraphQL */ `query GetUser($id: ID!) {
+  getUser(id: $id) {
     id
-    name
-    posts {
+    username
+    notes {
       nextToken
       startedAt
       __typename
@@ -25,16 +25,16 @@ export const getBlog = /* GraphQL */ `query GetBlog($id: ID!) {
     __typename
   }
 }
-` as GeneratedQuery<APITypes.GetBlogQueryVariables, APITypes.GetBlogQuery>;
-export const listBlogs = /* GraphQL */ `query ListBlogs(
-  $filter: ModelBlogFilterInput
+` as GeneratedQuery<APITypes.GetUserQueryVariables, APITypes.GetUserQuery>;
+export const listUsers = /* GraphQL */ `query ListUsers(
+  $filter: ModelUserFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  listBlogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+  listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      name
+      username
       createdAt
       updatedAt
       _version
@@ -47,14 +47,14 @@ export const listBlogs = /* GraphQL */ `query ListBlogs(
     __typename
   }
 }
-` as GeneratedQuery<APITypes.ListBlogsQueryVariables, APITypes.ListBlogsQuery>;
-export const syncBlogs = /* GraphQL */ `query SyncBlogs(
-  $filter: ModelBlogFilterInput
+` as GeneratedQuery<APITypes.ListUsersQueryVariables, APITypes.ListUsersQuery>;
+export const syncUsers = /* GraphQL */ `query SyncUsers(
+  $filter: ModelUserFilterInput
   $limit: Int
   $nextToken: String
   $lastSync: AWSTimestamp
 ) {
-  syncBlogs(
+  syncUsers(
     filter: $filter
     limit: $limit
     nextToken: $nextToken
@@ -62,7 +62,7 @@ export const syncBlogs = /* GraphQL */ `query SyncBlogs(
   ) {
     items {
       id
-      name
+      username
       createdAt
       updatedAt
       _version
@@ -75,131 +75,48 @@ export const syncBlogs = /* GraphQL */ `query SyncBlogs(
     __typename
   }
 }
-` as GeneratedQuery<APITypes.SyncBlogsQueryVariables, APITypes.SyncBlogsQuery>;
-export const getPost = /* GraphQL */ `query GetPost($id: ID!) {
-  getPost(id: $id) {
+` as GeneratedQuery<APITypes.SyncUsersQueryVariables, APITypes.SyncUsersQuery>;
+export const getNote = /* GraphQL */ `query GetNote($id: ID!) {
+  getNote(id: $id) {
     id
-    title
-    blog {
-      id
-      name
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    comments {
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    blogPostsId
-    __typename
-  }
-}
-` as GeneratedQuery<APITypes.GetPostQueryVariables, APITypes.GetPostQuery>;
-export const listPosts = /* GraphQL */ `query ListPosts(
-  $filter: ModelPostFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      title
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      blogPostsId
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<APITypes.ListPostsQueryVariables, APITypes.ListPostsQuery>;
-export const syncPosts = /* GraphQL */ `query SyncPosts(
-  $filter: ModelPostFilterInput
-  $limit: Int
-  $nextToken: String
-  $lastSync: AWSTimestamp
-) {
-  syncPosts(
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-    lastSync: $lastSync
-  ) {
-    items {
-      id
-      title
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      blogPostsId
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<APITypes.SyncPostsQueryVariables, APITypes.SyncPostsQuery>;
-export const getComment = /* GraphQL */ `query GetComment($id: ID!) {
-  getComment(id: $id) {
-    id
-    post {
-      id
-      title
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      blogPostsId
-      __typename
-    }
     content
     createdAt
     updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    postCommentsId
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetCommentQueryVariables,
-  APITypes.GetCommentQuery
->;
-export const listComments = /* GraphQL */ `query ListComments(
-  $filter: ModelCommentFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listComments(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
+    ownerId
+    user {
       id
-      content
+      username
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
-      postCommentsId
+      __typename
+    }
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<APITypes.GetNoteQueryVariables, APITypes.GetNoteQuery>;
+export const listNotes = /* GraphQL */ `query ListNotes(
+  $filter: ModelNoteFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listNotes(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      content
+      createdAt
+      updatedAt
+      ownerId
+      _version
+      _deleted
+      _lastChangedAt
+      owner
       __typename
     }
     nextToken
@@ -207,17 +124,14 @@ export const listComments = /* GraphQL */ `query ListComments(
     __typename
   }
 }
-` as GeneratedQuery<
-  APITypes.ListCommentsQueryVariables,
-  APITypes.ListCommentsQuery
->;
-export const syncComments = /* GraphQL */ `query SyncComments(
-  $filter: ModelCommentFilterInput
+` as GeneratedQuery<APITypes.ListNotesQueryVariables, APITypes.ListNotesQuery>;
+export const syncNotes = /* GraphQL */ `query SyncNotes(
+  $filter: ModelNoteFilterInput
   $limit: Int
   $nextToken: String
   $lastSync: AWSTimestamp
 ) {
-  syncComments(
+  syncNotes(
     filter: $filter
     limit: $limit
     nextToken: $nextToken
@@ -228,10 +142,43 @@ export const syncComments = /* GraphQL */ `query SyncComments(
       content
       createdAt
       updatedAt
+      ownerId
       _version
       _deleted
       _lastChangedAt
-      postCommentsId
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<APITypes.SyncNotesQueryVariables, APITypes.SyncNotesQuery>;
+export const notesByOwnerId = /* GraphQL */ `query NotesByOwnerId(
+  $ownerId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelNoteFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  notesByOwnerId(
+    ownerId: $ownerId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      content
+      createdAt
+      updatedAt
+      ownerId
+      _version
+      _deleted
+      _lastChangedAt
+      owner
       __typename
     }
     nextToken
@@ -240,6 +187,6 @@ export const syncComments = /* GraphQL */ `query SyncComments(
   }
 }
 ` as GeneratedQuery<
-  APITypes.SyncCommentsQueryVariables,
-  APITypes.SyncCommentsQuery
+  APITypes.NotesByOwnerIdQueryVariables,
+  APITypes.NotesByOwnerIdQuery
 >;

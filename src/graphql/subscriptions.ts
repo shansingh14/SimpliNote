@@ -8,11 +8,11 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onCreateBlog = /* GraphQL */ `subscription OnCreateBlog($filter: ModelSubscriptionBlogFilterInput) {
-  onCreateBlog(filter: $filter) {
+export const onCreateUser = /* GraphQL */ `subscription OnCreateUser($filter: ModelSubscriptionUserFilterInput) {
+  onCreateUser(filter: $filter) {
     id
-    name
-    posts {
+    username
+    notes {
       nextToken
       startedAt
       __typename
@@ -26,14 +26,14 @@ export const onCreateBlog = /* GraphQL */ `subscription OnCreateBlog($filter: Mo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateBlogSubscriptionVariables,
-  APITypes.OnCreateBlogSubscription
+  APITypes.OnCreateUserSubscriptionVariables,
+  APITypes.OnCreateUserSubscription
 >;
-export const onUpdateBlog = /* GraphQL */ `subscription OnUpdateBlog($filter: ModelSubscriptionBlogFilterInput) {
-  onUpdateBlog(filter: $filter) {
+export const onUpdateUser = /* GraphQL */ `subscription OnUpdateUser($filter: ModelSubscriptionUserFilterInput) {
+  onUpdateUser(filter: $filter) {
     id
-    name
-    posts {
+    username
+    notes {
       nextToken
       startedAt
       __typename
@@ -47,14 +47,14 @@ export const onUpdateBlog = /* GraphQL */ `subscription OnUpdateBlog($filter: Mo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateBlogSubscriptionVariables,
-  APITypes.OnUpdateBlogSubscription
+  APITypes.OnUpdateUserSubscriptionVariables,
+  APITypes.OnUpdateUserSubscription
 >;
-export const onDeleteBlog = /* GraphQL */ `subscription OnDeleteBlog($filter: ModelSubscriptionBlogFilterInput) {
-  onDeleteBlog(filter: $filter) {
+export const onDeleteUser = /* GraphQL */ `subscription OnDeleteUser($filter: ModelSubscriptionUserFilterInput) {
+  onDeleteUser(filter: $filter) {
     id
-    name
-    posts {
+    username
+    notes {
       nextToken
       startedAt
       __typename
@@ -68,186 +68,99 @@ export const onDeleteBlog = /* GraphQL */ `subscription OnDeleteBlog($filter: Mo
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteBlogSubscriptionVariables,
-  APITypes.OnDeleteBlogSubscription
+  APITypes.OnDeleteUserSubscriptionVariables,
+  APITypes.OnDeleteUserSubscription
 >;
-export const onCreatePost = /* GraphQL */ `subscription OnCreatePost($filter: ModelSubscriptionPostFilterInput) {
-  onCreatePost(filter: $filter) {
+export const onCreateNote = /* GraphQL */ `subscription OnCreateNote(
+  $filter: ModelSubscriptionNoteFilterInput
+  $owner: String
+) {
+  onCreateNote(filter: $filter, owner: $owner) {
     id
-    title
-    blog {
-      id
-      name
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    comments {
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    blogPostsId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreatePostSubscriptionVariables,
-  APITypes.OnCreatePostSubscription
->;
-export const onUpdatePost = /* GraphQL */ `subscription OnUpdatePost($filter: ModelSubscriptionPostFilterInput) {
-  onUpdatePost(filter: $filter) {
-    id
-    title
-    blog {
-      id
-      name
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    comments {
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    blogPostsId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdatePostSubscriptionVariables,
-  APITypes.OnUpdatePostSubscription
->;
-export const onDeletePost = /* GraphQL */ `subscription OnDeletePost($filter: ModelSubscriptionPostFilterInput) {
-  onDeletePost(filter: $filter) {
-    id
-    title
-    blog {
-      id
-      name
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    comments {
-      nextToken
-      startedAt
-      __typename
-    }
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    blogPostsId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeletePostSubscriptionVariables,
-  APITypes.OnDeletePostSubscription
->;
-export const onCreateComment = /* GraphQL */ `subscription OnCreateComment($filter: ModelSubscriptionCommentFilterInput) {
-  onCreateComment(filter: $filter) {
-    id
-    post {
-      id
-      title
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      blogPostsId
-      __typename
-    }
     content
     createdAt
     updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    postCommentsId
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateCommentSubscriptionVariables,
-  APITypes.OnCreateCommentSubscription
->;
-export const onUpdateComment = /* GraphQL */ `subscription OnUpdateComment($filter: ModelSubscriptionCommentFilterInput) {
-  onUpdateComment(filter: $filter) {
-    id
-    post {
+    ownerId
+    user {
       id
-      title
+      username
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
-      blogPostsId
       __typename
     }
-    content
-    createdAt
-    updatedAt
     _version
     _deleted
     _lastChangedAt
-    postCommentsId
+    owner
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateCommentSubscriptionVariables,
-  APITypes.OnUpdateCommentSubscription
+  APITypes.OnCreateNoteSubscriptionVariables,
+  APITypes.OnCreateNoteSubscription
 >;
-export const onDeleteComment = /* GraphQL */ `subscription OnDeleteComment($filter: ModelSubscriptionCommentFilterInput) {
-  onDeleteComment(filter: $filter) {
+export const onUpdateNote = /* GraphQL */ `subscription OnUpdateNote(
+  $filter: ModelSubscriptionNoteFilterInput
+  $owner: String
+) {
+  onUpdateNote(filter: $filter, owner: $owner) {
     id
-    post {
+    content
+    createdAt
+    updatedAt
+    ownerId
+    user {
       id
-      title
+      username
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
-      blogPostsId
       __typename
     }
-    content
-    createdAt
-    updatedAt
     _version
     _deleted
     _lastChangedAt
-    postCommentsId
+    owner
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteCommentSubscriptionVariables,
-  APITypes.OnDeleteCommentSubscription
+  APITypes.OnUpdateNoteSubscriptionVariables,
+  APITypes.OnUpdateNoteSubscription
+>;
+export const onDeleteNote = /* GraphQL */ `subscription OnDeleteNote(
+  $filter: ModelSubscriptionNoteFilterInput
+  $owner: String
+) {
+  onDeleteNote(filter: $filter, owner: $owner) {
+    id
+    content
+    createdAt
+    updatedAt
+    ownerId
+    user {
+      id
+      username
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteNoteSubscriptionVariables,
+  APITypes.OnDeleteNoteSubscription
 >;
