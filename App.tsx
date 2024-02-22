@@ -15,7 +15,6 @@ import { Amplify } from "aws-amplify";
 import config from "./src/aws-exports";
 import NetInfo from "@react-native-community/netinfo";
 
-
 Amplify.configure(config);
 
 interface ExtendedNote extends Note {
@@ -23,65 +22,63 @@ interface ExtendedNote extends Note {
 }
 
 const App = () => {
-  const [content, setContent] = useState<string>("");
   const [notes, setNotes] = useState<Note[]>([]);
-  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [editContent, setEditContent] = useState<string>("");
-  const [isSynced, setIsSynced] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [modalContent, setModalContent] = useState<string>("");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
-   useEffect(() => {
-     fetchNotes();
+  useEffect(() => {
+    fetchNotes();
 
-     const subscription = DataStore.observe(Note).subscribe(() => fetchNotes());
+    const subscription = DataStore.observe(Note).subscribe(() => fetchNotes());
 
-     return () => subscription.unsubscribe();
-   }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
-   useEffect(() => {
-     const subscription = DataStore.observe(Note).subscribe((msg) => {
-       console.log("Subscription message:", msg);
-       if (msg.opType === "INSERT") {
-         console.log("A new note was added:", msg.element);
-       } else if (msg.opType === "UPDATE") {
-         console.log("A note was updated:", msg.element);
-       } else if (msg.opType === "DELETE") {
-         console.log("A note was deleted:", msg.element);
-       }
-     });
+  useEffect(() => {
+    const subscription = DataStore.observe(Note).subscribe((msg) => {
+      console.log("Subscription message:", msg);
+      if (msg.opType === "INSERT") {
+        console.log("A new note was added:", msg.element);
+      } else if (msg.opType === "UPDATE") {
+        console.log("A note was updated:", msg.element);
+      } else if (msg.opType === "DELETE") {
+        console.log("A note was deleted:", msg.element);
+      }
+    });
 
-     return () => subscription.unsubscribe();
-   }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
-   useEffect(() => {
-     const handleSync = async () => {
-       try {
-         await DataStore.start();
-         console.log("DataStore started!");
-       } catch (error) {
-         console.error("Error starting DataStore", error);
-       }
-     };
+  useEffect(() => {
+    const handleSync = async () => {
+      try {
+        await DataStore.start();
+        console.log("DataStore started!");
+      } catch (error) {
+        console.error("Error starting DataStore", error);
+      }
+    };
 
-     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-       if (state.isConnected) {
-         handleSync();
-       }
-     });
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      if (state.isConnected) {
+        handleSync();
+      }
+    });
 
-     handleSync();
+    handleSync();
 
-     return () => unsubscribeNetInfo();
-   }, []);
+    return () => unsubscribeNetInfo();
+  }, []);
 
-   async function fetchNotes() {
-     try {
-       const notesData = await DataStore.query(Note) as ExtendedNote[];
-       setNotes(notesData.filter((note) => !note._deleted));
-     } catch (err) {
-       console.error("Error fetching notes:", err);
-     }
-   }
+  async function fetchNotes() {
+    try {
+      const notesData = (await DataStore.query(Note)) as ExtendedNote[];
+      setNotes(notesData.filter((note) => !note._deleted));
+    } catch (err) {
+      console.error("Error fetching notes:", err);
+    }
+  }
 
   const TEMP_USERNAME = "demo_user";
   async function ensureUserExists() {
@@ -100,36 +97,48 @@ const App = () => {
     });
   }, []);
 
-  let tempOwnerId = "";
-  let user = null;
-  async function createNote() {
-    if (!content) return;
-
-    if (!tempOwnerId) {
-      const user = await ensureUserExists();
-      tempOwnerId = user.id;
-    }
-
-    const createdAt = new Date().toISOString();
-    const updatedAt = new Date().toISOString();
-
-    try {
+  async function handleSaveNote() {
+    const user = await ensureUserExists();
+    if (editingNoteId) {
+      const originalNote = await DataStore.query(Note, editingNoteId);
+      if (originalNote) {
+        // Check if the note actually exists
+        await DataStore.save(
+          Note.copyOf(originalNote, (updated) => {
+            updated.content = modalContent;
+          })
+        );
+      } else {
+        console.error("Note not found, unable to update");
+      }
+    } else {
+      // Create a new note if editingNoteId is not set
       await DataStore.save(
         new Note({
-          content: content,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          ownerId: tempOwnerId,
+          content: modalContent,
+          ownerId: user.id,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         })
       );
-      console.log("Note created successfully");
-      console.log()
-    } catch (err) {
-      console.error("Error creating note:", err);
     }
-
-    setContent("");
+    // Reset states and fetch notes again
+    setModalContent("");
+    setEditingNoteId(null);
+    setIsModalVisible(false);
     fetchNotes();
+  }
+
+  function openModalForNewNote() {
+    setModalContent("");
+    setEditingNoteId(null);
+    setIsModalVisible(true);
+  }
+
+  function openModalForEdit(note: Note) {
+    setModalContent(note.content);
+    setEditingNoteId(note.id);
+    setIsModalVisible(true);
   }
 
   async function deleteNoteById(noteId: string) {
@@ -147,76 +156,40 @@ const App = () => {
     }
   }
 
-  async function updateNoteContent(noteId: string, newContent: string) {
-    try {
-      const noteToUpdate = await DataStore.query(Note, noteId);
-      if (noteToUpdate) {
-        await DataStore.save(
-          Note.copyOf(noteToUpdate, (updated) => {
-            updated.content = newContent;
-          })
-        );
-        console.log("Note updated successfully");
-        setEditContent("");
-        fetchNotes();
-      }
-    } catch (err) {
-      console.error("Error updating note:", err);
-    }
-  }
-
   return (
     <SafeAreaView style={styles.container}>
-      <TextInput
-        value={content}
-        onChangeText={setContent}
-        placeholder="Write a note"
-        style={styles.input}
-      />
-      <Button title="Add Note" onPress={createNote} />
+      <Button title="Add Note" onPress={openModalForNewNote} />
       <FlatList
         data={notes}
         renderItem={({ item }) => (
           <View style={styles.noteItem}>
             <Text style={styles.noteContent}>{item.content}</Text>
-            <View style={styles.buttonsContainer}>
-              <Button title="Delete" onPress={() => deleteNoteById(item.id)} />
-              <Button
-                title="Edit"
-                onPress={() => {
-                  setEditingNote(item);
-                  setEditContent(item.content);
-                  setIsEditModalVisible(true);
-                }}
-              />
-            </View>
+            <Button title="Edit" onPress={() => openModalForEdit(item)} />
+            <Button title="Delete" onPress={() => deleteNoteById(item.id)} />
           </View>
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
       />
       <Modal
         animationType="slide"
         transparent={true}
-        visible={isEditModalVisible}
-        onRequestClose={() => {
-          setIsEditModalVisible(!isEditModalVisible);
-        }}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <TextInput
-              style={styles.modalText}
-              onChangeText={setEditContent}
-              value={editContent}
+              style={styles.modalTextInput}
+              onChangeText={setModalContent}
+              value={modalContent}
+              placeholder="Note Content"
+              multiline
+              numberOfLines={10} // Adjust this to change the initial height of the TextInput
             />
-            <Button
-              title="Save"
-              onPress={() => {
-                if (editingNote) updateNoteContent(editingNote.id, editContent);
-                setIsEditModalVisible(!isEditModalVisible);
-                setEditingNote(null);
-              }}
-            />
+            <View style={styles.modalButtons}>
+              <Button title="Cancel" onPress={() => setIsModalVisible(false)} />
+              <Button title="Save Note" onPress={handleSaveNote} />
+            </View>
           </View>
         </View>
       </Modal>
@@ -224,39 +197,13 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({ 
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  noteItem: {
-    backgroundColor: "#f9f9f9",
-    padding: 10,
-    marginVertical: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  noteContent: {
-    fontSize: 16,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: 100,
-  },
+const styles = StyleSheet.create({
+  // Other styles remain unchanged
   centeredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Adding a semi-transparent background
   },
   modalView: {
     margin: 20,
@@ -272,10 +219,36 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    width: "80%", // Ensuring the modal is 80% of screen width
+    maxHeight: "60%", // Ensuring the modal height doesn't exceed 60% of screen height
   },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
+  modalTextInput: {
+    width: "100%", // Making TextInput take the full width of the modal
+    minHeight: 100, // Minimum height to ensure it's not too small
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 20,
+    borderRadius: 5, // Adding some rounded corners
+    textAlignVertical: "top", // Ensure multiline text starts at the top
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%", // Buttons span the full width of the modal
+  },
+  // Revert any changes that negatively affected the list of notes
+  noteItem: {
+    backgroundColor: "#f9f9f9",
+    padding: 10,
+    marginVertical: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  noteContent: {
+    fontSize: 16,
   },
 });
 
