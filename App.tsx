@@ -14,6 +14,7 @@ import { Note, User } from "./src/models";
 import { Amplify } from "aws-amplify";
 import config from "./src/aws-exports";
 import NetInfo from "@react-native-community/netinfo";
+import { Hub } from "aws-amplify/utils";
 
 Amplify.configure(config);
 
@@ -27,51 +28,60 @@ const App = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [editContent, setEditContent] = useState<string>("");
+  const [isSynced, setIsSynced] = useState<boolean>(false);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      console.log("Connection type", state.type);
-      console.log("Is connected?", state.isConnected);
+   useEffect(() => {
+     fetchNotes();
 
-      if (state.isConnected) {
-        (async () => {
-          try {
-            await DataStore.start();
-            console.log("DataStore started!");
-          } catch (error) {
-            console.error("Error starting DataStore", error);
-          }
-        })();
-      }
-    });
-    fetchNotes();
-    return () => unsubscribe();
-  }, []);
+     const subscription = DataStore.observe(Note).subscribe(() => fetchNotes());
 
-  useEffect(() => {
-    const subscription = DataStore.observe(Note).subscribe((msg) => {
-      console.log("Subscription message:", msg);
-      if (msg.opType === "INSERT") {
-        console.log("A new note was added:", msg.element);
-      } else if (msg.opType === "UPDATE") {
-        console.log("A note was updated:", msg.element);
-      } else if (msg.opType === "DELETE") {
-        console.log("A note was deleted:", msg.element);
-      }
-    });
+     return () => subscription.unsubscribe();
+   }, []);
 
-    return () => subscription.unsubscribe();
-  }, []);
+   useEffect(() => {
+     const subscription = DataStore.observe(Note).subscribe((msg) => {
+       console.log("Subscription message:", msg);
+       if (msg.opType === "INSERT") {
+         console.log("A new note was added:", msg.element);
+       } else if (msg.opType === "UPDATE") {
+         console.log("A note was updated:", msg.element);
+       } else if (msg.opType === "DELETE") {
+         console.log("A note was deleted:", msg.element);
+       }
+     });
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+     return () => subscription.unsubscribe();
+   }, []);
 
-  async function fetchNotes() {
-    const notesData = (await DataStore.query(Note)) as ExtendedNote[];
-    const activeNotes = notesData.filter((note) => !note._deleted); // Exclude notes marked as deleted
-    setNotes(activeNotes);
-  }
+   useEffect(() => {
+     const handleSync = async () => {
+       try {
+         await DataStore.start();
+         console.log("DataStore started!");
+       } catch (error) {
+         console.error("Error starting DataStore", error);
+       }
+     };
+
+     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+       if (state.isConnected) {
+         handleSync();
+       }
+     });
+
+     handleSync();
+
+     return () => unsubscribeNetInfo();
+   }, []);
+
+   async function fetchNotes() {
+     try {
+       const notesData = await DataStore.query(Note) as ExtendedNote[];
+       setNotes(notesData.filter((note) => !note._deleted));
+     } catch (err) {
+       console.error("Error fetching notes:", err);
+     }
+   }
 
   const TEMP_USERNAME = "demo_user";
   async function ensureUserExists() {
@@ -87,7 +97,6 @@ const App = () => {
   useEffect(() => {
     ensureUserExists().then((tempUserId) => {
       console.log("Temporary User ID:", tempUserId);
-      // You can now use tempUserId as the ownerId for new notes
     });
   }, []);
 
@@ -114,6 +123,7 @@ const App = () => {
         })
       );
       console.log("Note created successfully");
+      console.log()
     } catch (err) {
       console.error("Error creating note:", err);
     }
@@ -128,7 +138,9 @@ const App = () => {
       if (noteToDelete) {
         await DataStore.delete(noteToDelete);
         console.log("Note deleted successfully");
-        fetchNotes();
+        setNotes((currentNotes) =>
+          currentNotes.filter((note) => note.id !== noteId)
+        );
       }
     } catch (err) {
       console.error("Error deleting note:", err);
@@ -152,11 +164,6 @@ const App = () => {
       console.error("Error updating note:", err);
     }
   }
-
-  const promptForNoteContent = (noteId: string, currentContent: string) => {
-    const newContent = "New note content";
-    updateNoteContent(noteId, newContent);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -207,7 +214,7 @@ const App = () => {
               onPress={() => {
                 if (editingNote) updateNoteContent(editingNote.id, editContent);
                 setIsEditModalVisible(!isEditModalVisible);
-                setEditingNote(null); // Clear current editing note
+                setEditingNote(null);
               }}
             />
           </View>
@@ -217,7 +224,7 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ 
   container: {
     flex: 1,
     padding: 20,
