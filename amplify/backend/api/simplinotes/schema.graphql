@@ -8,7 +8,7 @@ type User @model {
   notes: [Note] @hasMany(indexName: "byUser", fields: ["id"])
 }
 
-type Note @model @auth(rules: [{ allow: owner }]) {
+type Note @model {
   id: ID!
   content: String!
   createdAt: AWSDateTime!

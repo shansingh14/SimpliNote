@@ -21,6 +21,21 @@ const App = () => {
   const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
+    const subscription = DataStore.observe(Note).subscribe((msg) => {
+      console.log("Subscription message:", msg);
+      if (msg.opType === "INSERT") {
+        console.log("A new note was added:", msg.element);
+      } else if (msg.opType === "UPDATE") {
+        console.log("A note was updated:", msg.element);
+      } else if (msg.opType === "DELETE") {
+        console.log("A note was deleted:", msg.element);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     fetchNotes();
   }, []);
 
@@ -47,9 +62,8 @@ const App = () => {
     });
   }, []);
 
-
   let tempOwnerId = "";
-  let user = null
+  let user = null;
   async function createNote() {
     if (!content) return;
 

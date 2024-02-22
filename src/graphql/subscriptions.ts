@@ -71,11 +71,8 @@ export const onDeleteUser = /* GraphQL */ `subscription OnDeleteUser($filter: Mo
   APITypes.OnDeleteUserSubscriptionVariables,
   APITypes.OnDeleteUserSubscription
 >;
-export const onCreateNote = /* GraphQL */ `subscription OnCreateNote(
-  $filter: ModelSubscriptionNoteFilterInput
-  $owner: String
-) {
-  onCreateNote(filter: $filter, owner: $owner) {
+export const onCreateNote = /* GraphQL */ `subscription OnCreateNote($filter: ModelSubscriptionNoteFilterInput) {
+  onCreateNote(filter: $filter) {
     id
     content
     createdAt
@@ -94,7 +91,6 @@ export const onCreateNote = /* GraphQL */ `subscription OnCreateNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
@@ -102,11 +98,8 @@ export const onCreateNote = /* GraphQL */ `subscription OnCreateNote(
   APITypes.OnCreateNoteSubscriptionVariables,
   APITypes.OnCreateNoteSubscription
 >;
-export const onUpdateNote = /* GraphQL */ `subscription OnUpdateNote(
-  $filter: ModelSubscriptionNoteFilterInput
-  $owner: String
-) {
-  onUpdateNote(filter: $filter, owner: $owner) {
+export const onUpdateNote = /* GraphQL */ `subscription OnUpdateNote($filter: ModelSubscriptionNoteFilterInput) {
+  onUpdateNote(filter: $filter) {
     id
     content
     createdAt
@@ -125,7 +118,6 @@ export const onUpdateNote = /* GraphQL */ `subscription OnUpdateNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
@@ -133,11 +125,8 @@ export const onUpdateNote = /* GraphQL */ `subscription OnUpdateNote(
   APITypes.OnUpdateNoteSubscriptionVariables,
   APITypes.OnUpdateNoteSubscription
 >;
-export const onDeleteNote = /* GraphQL */ `subscription OnDeleteNote(
-  $filter: ModelSubscriptionNoteFilterInput
-  $owner: String
-) {
-  onDeleteNote(filter: $filter, owner: $owner) {
+export const onDeleteNote = /* GraphQL */ `subscription OnDeleteNote($filter: ModelSubscriptionNoteFilterInput) {
+  onDeleteNote(filter: $filter) {
     id
     content
     createdAt
@@ -156,7 +145,6 @@ export const onDeleteNote = /* GraphQL */ `subscription OnDeleteNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }

@@ -96,7 +96,6 @@ export const getNote = /* GraphQL */ `query GetNote($id: ID!) {
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
@@ -116,7 +115,6 @@ export const listNotes = /* GraphQL */ `query ListNotes(
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
     nextToken
@@ -146,7 +144,6 @@ export const syncNotes = /* GraphQL */ `query SyncNotes(
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
     nextToken
@@ -178,7 +175,6 @@ export const notesByOwnerId = /* GraphQL */ `query NotesByOwnerId(
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
     nextToken

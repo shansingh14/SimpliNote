@@ -103,7 +103,6 @@ export const createNote = /* GraphQL */ `mutation CreateNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
@@ -134,7 +133,6 @@ export const updateNote = /* GraphQL */ `mutation UpdateNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
@@ -165,7 +163,6 @@ export const deleteNote = /* GraphQL */ `mutation DeleteNote(
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
