@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { DataStore } from "@aws-amplify/datastore";
-import { Note } from "./src/models"; // Adjust based on your actual path
+import { Note, User } from "./src/models"; // Adjust based on your actual path
 import { Amplify } from "aws-amplify";
 import config from "./src/aws-exports"; // Your path might vary
 
@@ -29,10 +29,35 @@ const App = () => {
     setNotes(notesData);
   }
 
+  const TEMP_USERNAME = "demo_user";
+  async function ensureUserExists() {
+    let user = await DataStore.query(User, (u) =>
+      u.username.eq(TEMP_USERNAME)
+    ).then((users) => users[0]);
+    if (!user) {
+      user = await DataStore.save(new User({ username: TEMP_USERNAME }));
+    }
+    return user;
+  }
+
+  useEffect(() => {
+    ensureUserExists().then((tempUserId) => {
+      console.log("Temporary User ID:", tempUserId);
+      // You can now use tempUserId as the ownerId for new notes
+    });
+  }, []);
+
+
+  let tempOwnerId = "";
+  let user = null
   async function createNote() {
     if (!content) return;
 
-    const ownerId = "temporary-owner-id";
+    if (!tempOwnerId) {
+      const user = await ensureUserExists();
+      tempOwnerId = user.id;
+    }
+
     const createdAt = new Date().toISOString();
     const updatedAt = new Date().toISOString();
 
@@ -42,17 +67,16 @@ const App = () => {
           content: content,
           createdAt: createdAt,
           updatedAt: updatedAt,
-          ownerId: ownerId,
+          ownerId: tempOwnerId,
         })
       );
       console.log("Note created successfully");
     } catch (err) {
       console.error("Error creating note:", err);
-      // Handle the error appropriately in your UI, possibly setting an error state
     }
 
     setContent("");
-    fetchNotes(); // Refresh the list of notes after adding a new one
+    fetchNotes();
   }
 
   return (
