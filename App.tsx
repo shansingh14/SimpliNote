@@ -10,11 +10,16 @@ import {
   Modal,
 } from "react-native";
 import { DataStore } from "@aws-amplify/datastore";
-import { Note, User } from "./src/models"; // Adjust based on your actual path
+import { Note, User } from "./src/models";
 import { Amplify } from "aws-amplify";
-import config from "./src/aws-exports"; // Your path might vary
+import config from "./src/aws-exports";
+import NetInfo from "@react-native-community/netinfo";
 
 Amplify.configure(config);
+
+interface ExtendedNote extends Note {
+  _deleted?: boolean;
+}
 
 const App = () => {
   const [content, setContent] = useState<string>("");
@@ -22,6 +27,26 @@ const App = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [editContent, setEditContent] = useState<string>("");
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+
+      if (state.isConnected) {
+        (async () => {
+          try {
+            await DataStore.start();
+            console.log("DataStore started!");
+          } catch (error) {
+            console.error("Error starting DataStore", error);
+          }
+        })();
+      }
+    });
+    fetchNotes();
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const subscription = DataStore.observe(Note).subscribe((msg) => {
@@ -43,8 +68,9 @@ const App = () => {
   }, []);
 
   async function fetchNotes() {
-    const notesData = await DataStore.query(Note);
-    setNotes(notesData);
+    const notesData = (await DataStore.query(Note)) as ExtendedNote[];
+    const activeNotes = notesData.filter((note) => !note._deleted); // Exclude notes marked as deleted
+    setNotes(activeNotes);
   }
 
   const TEMP_USERNAME = "demo_user";
@@ -108,7 +134,6 @@ const App = () => {
       console.error("Error deleting note:", err);
     }
   }
-
 
   async function updateNoteContent(noteId: string, newContent: string) {
     try {
