@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
   View,
+  Modal,
 } from "react-native";
 import { DataStore } from "@aws-amplify/datastore";
 import { Note, User } from "./src/models"; // Adjust based on your actual path
@@ -17,8 +18,10 @@ Amplify.configure(config);
 
 const App = () => {
   const [content, setContent] = useState<string>("");
-  // Explicitly type the notes state with Note[]
   const [notes, setNotes] = useState<Note[]>([]);
+  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
 
   useEffect(() => {
     const subscription = DataStore.observe(Note).subscribe((msg) => {
@@ -93,6 +96,43 @@ const App = () => {
     fetchNotes();
   }
 
+  async function deleteNoteById(noteId: string) {
+    try {
+      const noteToDelete = await DataStore.query(Note, noteId);
+      if (noteToDelete) {
+        await DataStore.delete(noteToDelete);
+        console.log("Note deleted successfully");
+        fetchNotes();
+      }
+    } catch (err) {
+      console.error("Error deleting note:", err);
+    }
+  }
+
+
+  async function updateNoteContent(noteId: string, newContent: string) {
+    try {
+      const noteToUpdate = await DataStore.query(Note, noteId);
+      if (noteToUpdate) {
+        await DataStore.save(
+          Note.copyOf(noteToUpdate, (updated) => {
+            updated.content = newContent;
+          })
+        );
+        console.log("Note updated successfully");
+        setEditContent("");
+        fetchNotes();
+      }
+    } catch (err) {
+      console.error("Error updating note:", err);
+    }
+  }
+
+  const promptForNoteContent = (noteId: string, currentContent: string) => {
+    const newContent = "New note content";
+    updateNoteContent(noteId, newContent);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <TextInput
@@ -107,10 +147,47 @@ const App = () => {
         renderItem={({ item }) => (
           <View style={styles.noteItem}>
             <Text style={styles.noteContent}>{item.content}</Text>
+            <View style={styles.buttonsContainer}>
+              <Button title="Delete" onPress={() => deleteNoteById(item.id)} />
+              <Button
+                title="Edit"
+                onPress={() => {
+                  setEditingNote(item);
+                  setEditContent(item.content);
+                  setIsEditModalVisible(true);
+                }}
+              />
+            </View>
           </View>
         )}
         keyExtractor={(item) => item.id}
       />
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isEditModalVisible}
+        onRequestClose={() => {
+          setIsEditModalVisible(!isEditModalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TextInput
+              style={styles.modalText}
+              onChangeText={setEditContent}
+              value={editContent}
+            />
+            <Button
+              title="Save"
+              onPress={() => {
+                if (editingNote) updateNoteContent(editingNote.id, editContent);
+                setIsEditModalVisible(!isEditModalVisible);
+                setEditingNote(null); // Clear current editing note
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -131,9 +208,42 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     padding: 10,
     marginVertical: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   noteContent: {
     fontSize: 16,
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 100,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
 });
 
