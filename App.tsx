@@ -14,7 +14,7 @@ import { Note, User } from "./src/models";
 import { Amplify } from "aws-amplify";
 import config from "./src/aws-exports";
 import NetInfo from "@react-native-community/netinfo";
-import { Hub } from "aws-amplify/utils";
+
 
 Amplify.configure(config);
 
